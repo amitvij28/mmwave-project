@@ -58,3 +58,34 @@ SCREEN_CONNECTED = True
 <p align="center">
   <img src="scene_params.png" alt="params"/>
 </p>
+
+
+## Re-training the model
+
+1. Download our dataset in the main project directory.
+
+2. Run (or modify) the preprocessing algorithm.
+  ```sh
+    python3 ./src/preprocessing.py
+  ```
+
+3. The output will be in the */formatted/* folder and have the format:
+  ```bash
+
+  ├── dataset
+  │   ├── formatted
+  │   │   ├── kinect
+  │   │   |   ├── training_labels.npy
+  │   │   |   ├── validate_labels.npy
+  │   │   |   ├── testing_labels.npy
+  │   │   ├── mmWave
+  │   │   |   ├── training_mmWave.npy
+  │   │   |   ├── validate_mmWave.npy
+  │   │   |   ├── testing_mmWave.npy
+  
+  ```
+
+4. Train the model.
+  ```sh
+    python3 ./src/train.py
+  ``` 
