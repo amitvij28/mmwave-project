@@ -78,9 +78,6 @@ def filter_kinect_frames(pairs, invalid_frames, experiment):
                 translated_row = translate_kinect(row)
 
                 if RELATIVE_ENABLED:
-                    #     # current_centroid = centroids[valid_counter]
-                    #     # translated_row = relative_kinect(translated_row, current_centroid)
-
                     translated_row = static_kinect(translated_row)
 
                 writer.writerow(translated_row)
@@ -149,7 +146,7 @@ def preprocess_dataset():
         frames_in_cur_file = 0
         cur_file_index = 1
         cur_file = os.path.join(output_dir, f"{cur_file_index}.csv")
-        centroids = []
+        # centroids = []
 
         trackbuffer = TrackBuffer()
         batch = BatchedData()
@@ -198,11 +195,11 @@ def preprocess_dataset():
                                         ].cluster.centroid,
                                     )
 
-                                    centroids.append(
-                                        trackbuffer.effective_tracks[
-                                            0
-                                        ].cluster.centroid[:2]
-                                    )
+                                    # centroids.append(
+                                    #     trackbuffer.effective_tracks[
+                                    #         0
+                                    #     ].cluster.centroid[:2]
+                                    # )
 
                                 final_frames = format_batched_frames(frames_to_process)
 
@@ -257,7 +254,7 @@ def preprocess_dataset():
         df = pd.DataFrame(data_buffer)
         df.to_csv(cur_file, mode="a", index=False, header=False)
 
-        np.save(f"./centroids_final/{experiment}_centroid.npy", np.array(centroids))
+        # np.save(f"./centroids_final/{experiment}_centroid.npy", np.array(centroids))
 
         filter_kinect_frames(frame_pairs, invalid_frames, experiment)
 
