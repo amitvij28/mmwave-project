@@ -3,7 +3,6 @@ import pandas as pd
 import shutil
 import os
 import csv
-import random
 import constants as const
 from tqdm import tqdm
 from Utils import (
@@ -19,6 +18,7 @@ from Tracking import (
 )
 from wakepy import keep
 
+# Dataset capturing environment setup offsets
 KINECT_Z = 0.8
 KINECT_X = 0.22
 RELATIVE_ENABLED = True
@@ -106,19 +106,6 @@ def translate_kinect(row):
         # For all y coords:
         else:
             row[i] = str(float(row[i]) * np.cos(ang_rad) - z * np.sin(ang_rad))
-
-    return row
-
-
-def relative_kinect(row, centroid):
-    for i in range(2, len(row) - 1):
-        # For all x coords
-        if i % 3 == 2:
-            row[i] = str(float(row[i]) - centroid[0])
-
-        # For all y coords:
-        elif i % 3 == 1:
-            row[i] = str(float(row[i]) - centroid[1])
 
     return row
 
@@ -275,33 +262,13 @@ def preprocess_dataset():
         filter_kinect_frames(frame_pairs, invalid_frames, experiment)
 
 
-def find_intensity_normalizers(sets):
-    intensities = []
-    for mode in sets:
-        experiments_directory = f"{const.P_PREPROCESS_PATH}{const.P_MMWAVE_DIR}{mode}/"
-        for experiment in os.listdir(experiments_directory):
-            if experiment.find("N_") == -1:
-                input_path = os.path.join(experiments_directory, experiment)
-                for filename in os.listdir(input_path):
-                    with open(os.path.join(input_path, filename), "r") as file:
-                        csv_reader = csv.reader(file)
-                        for row in csv_reader:
-                            intensities.append(float(row[5]))
-
-    mean = np.mean(intensities)
-    std_dev = np.std(intensities)
-
-    print(f"Mean: {mean}, STD: {std_dev}")
-    return mean, std_dev
-
-
 def format_mmwave_to_npy(
     mode, index, mean=const.INTENSITY_MU, std_dev=const.INTENSITY_STD
 ):
 
     # Exactly how many frames we process
-    BATCH_SIZE = 1
-    FUSE = True
+    BATCH_SIZE = 3
+    FUSE = False
 
     experiments_directory = f"{const.P_PREPROCESS_PATH}{const.P_MMWAVE_DIR}{mode}/"
     output_path = f"{const.P_FORMATTED_PATH}{const.P_MMWAVE_DIR}{index}/"
@@ -473,46 +440,13 @@ def split_sets(prefixes):
                         )
 
 
-def add_noise():
-    mean = 0.0
-    std = 0.022
+##################################################################
 
-    # mmWave
-    experiments_directory = f"{const.P_PREPROCESS_PATH}{const.P_MMWAVE_DIR}training/"
-    for experiment in os.listdir(experiments_directory):
-        input_path = os.path.join(experiments_directory, experiment)
-        distorted_experiment = f"N_{experiment}"
-        distorted_path = os.path.join(experiments_directory, distorted_experiment)
-        if os.path.exists(distorted_path):
-            shutil.rmtree(distorted_path)
-        os.mkdir(distorted_path)
-        for filename in os.listdir(input_path):
-            with open(os.path.join(input_path, filename), "r") as file:
-                reader = csv.reader(file)
-                rows = list(reader)
+# Run the preprocessing and formatting steps for the raw dataset.
 
-            # Add noise in x y z coords
-            for row in rows:
-                for i in range(1, 4):
-                    if float(row[i]) != 0:
-                        row[i] = str(
-                            float(row[i]) + np.random.normal(loc=mean, scale=std)
-                        )
+##################################################################
 
-            # Write the modified data to a new CSV file
-            with open(os.path.join(distorted_path, filename), "w", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerows(rows)
-
-    # Kinect
-    experiments_directory = f"{const.P_PREPROCESS_PATH}{const.P_KINECT_DIR}training/"
-    for experiment in os.listdir(experiments_directory):
-        new_file_name = f"N_{experiment}"
-        new_file_path = os.path.join(experiments_directory, new_file_name)
-        original_file_path = os.path.join(experiments_directory, experiment)
-        shutil.copyfile(original_file_path, new_file_path)
-
-
+# 10 randomly split sets [validation, testing]
 sets = [
     [["A6", "A4", "B2"], ["B1", "B4", "A5"]],
     [["B1", "B3", "A3"], ["B2", "B8", "B7"]],
@@ -526,10 +460,10 @@ sets = [
     [["A4", "B6", "A7"], ["B2", "B5", "B1"]],
 ]
 
+print("Preprocessing:")
 preprocess_dataset()
 
 print("Formatting:")
 for i in tqdm(range(10)):
     split_sets(sets[i])
-    # add_noise()
     format_dataset(i)

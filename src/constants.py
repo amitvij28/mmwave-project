@@ -11,7 +11,7 @@ SCREEN_CONNECTED = True
 
 ##### Paths and Ports #####
 P_CONFIG_PATH = "./config_cases/our_config_8.5m.cfg"
-P_MODEL_PATH = "../trained_cases/Our_system/model/MARS.h5"
+P_MODEL_PATH = "./model/trained_model.h5"
 P_DATA_PATH = "./dataset"
 
 P_LOG_PATH = f"{P_DATA_PATH}/log"
