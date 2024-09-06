@@ -12,7 +12,7 @@ NOTE: This repository uses a simplified [GTRACK](https://dev.ti.com/tirex/explor
 ## About
 
 This is the repository for my MSc thesis: 
-[*Real-time mmWave Multi-Person Pose Estimation System for Privacy-Aware Windows*]() (not linked yet)
+[*Real-time mmWave Multi-Person Pose Estimation System for Privacy-Aware Windows*](https://resolver.tudelft.nl/uuid:9d78ecc9-062a-4201-89f7-079ac59c385a) 
 
 <p align="center">
   <img src="demo.gif" alt="animated" />
