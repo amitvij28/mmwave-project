@@ -85,6 +85,7 @@ def filter_kinect_frames(pairs, invalid_frames, experiment):
 
 
 def translate_kinect(row):
+    # TODO: Is this angle rad for the tilt of the mmwave radar?
     ang_rad = np.radians(6.5)
     z, y = 0, 0
     for i in range(2, len(row) - 1):
@@ -369,16 +370,25 @@ def extract_parts(filename):
 
 def split_sets(prefixes):
 
-    kinect_directory = f"{const.P_PREPROCESS_PATH}{const.P_KINECT_DIR}/"
-    mmwave_directory = f"{const.P_PREPROCESS_PATH}{const.P_MMWAVE_DIR}/"
+    kinect_directory = f"{const.P_PREPROCESS_PATH}{const.P_KINECT_DIR}"
+    mmwave_directory = f"{const.P_PREPROCESS_PATH}{const.P_MMWAVE_DIR}"
 
     directories = [kinect_directory, mmwave_directory]
 
     for directory in directories:
-        shutil.rmtree(f"{directory}/training")
-        shutil.rmtree(f"{directory}/validate")
-        shutil.rmtree(f"{directory}/testing")
-
+        try:
+            shutil.rmtree(os.path.join(f"{directory}", "training"))
+        except Exception as e:
+            pass
+        try:
+            shutil.rmtree(os.path.join(f"{directory}", "validate"))
+        except Exception as e:
+            pass
+        try:
+            shutil.rmtree(os.path.join(f"{directory}", "testing"))
+        except Exception as e:
+            pass
+        
     # validate_prefix, testing_prefix = random_split_sets()
     validate_prefix = prefixes[0]
     testing_prefix = prefixes[1]
@@ -386,9 +396,9 @@ def split_sets(prefixes):
     for directory in directories:
         experiments = os.listdir(directory)
 
-        os.makedirs(f"{directory}/training")
-        os.makedirs(f"{directory}/validate")
-        os.makedirs(f"{directory}/testing")
+        os.makedirs(os.path.join(f"{directory}", "training"))
+        os.makedirs(os.path.join(f"{directory}", "validate"))
+        os.makedirs(os.path.join(f"{directory}", "testing"))
 
         for experiment in experiments:
             if (
@@ -401,7 +411,8 @@ def split_sets(prefixes):
                     if any(experiment.find(prefix) != -1 for prefix in validate_prefix):
                         shutil.copytree(
                             source,
-                            f"{directory}/validate/{experiment}",
+                            os.path.join(f"{directory}", "validate", f"{experiment}")
+                            # f"{directory}/validate/{experiment}",
                         )
 
                     elif any(
@@ -409,18 +420,21 @@ def split_sets(prefixes):
                     ):
                         shutil.copytree(
                             source,
-                            f"{directory}/testing/{experiment}",
+                            os.path.join(f"{directory}", "testing", f"{experiment}")
+                            # f"{directory}/testing/{experiment}",
                         )
                     else:
                         shutil.copytree(
                             source,
-                            f"{directory}/training/{experiment}",
+                            os.path.join(f"{directory}", "training", f"{experiment}")
+                            # f"{directory}/training/{experiment}",
                         )
                 else:
                     if any(experiment.find(prefix) != -1 for prefix in validate_prefix):
                         shutil.copy(
                             source,
-                            f"{directory}/validate/{experiment}",
+                            os.path.join(f"{directory}", "validate", f"{experiment}")
+                            # f"{directory}/validate/{experiment}",
                         )
 
                     elif any(
@@ -428,12 +442,14 @@ def split_sets(prefixes):
                     ):
                         shutil.copy(
                             source,
-                            f"{directory}/testing/{experiment}",
+                            os.path.join(f"{directory}", "testing", f"{experiment}")
+                            # f"{directory}/testing/{experiment}",
                         )
                     else:
                         shutil.copy(
                             source,
-                            f"{directory}/training/{experiment}",
+                            os.path.join(f"{directory}", "training", f"{experiment}")
+                            # f"{directory}/training/{experiment}",
                         )
 
 
