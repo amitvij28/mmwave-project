@@ -77,10 +77,11 @@ class OfflineManager:
         Check if the offline experiment has finished.
     """
 
-    def __init__(self, experiment_path):
+    def __init__(self, experiment_path, matched_frames = None):
         self.experiment_path = experiment_path
         self.frame_count = 0
         self.pointer = [0, 1]
+        self.matched_frames = matched_frames
         self.read_next_frames()
 
     def read_next_frames(self):
@@ -101,13 +102,18 @@ class OfflineManager:
                             continue
 
                         framenum = int(row[0])
+                        
+                        # Skip Unmatched frames with ground truth data
+                        if self.matched_frames and framenum not in self.matched_frames:
+                            continue
+
                         coords = [
                             float(row[1]),
                             float(row[2]),
                             float(row[3]),
                             float(row[4]),
                             float(row[5]),
-                            int(row[6]),
+                            int(row[6]) if len(row) == 7 else 100000,
                         ]
 
                         # Read only the frames in the specified range
@@ -467,7 +473,7 @@ def relative_coordinates(absolute_coords, reference: np.array):
 
 def format_single_frame(
     track_cloud, mean=const.INTENSITY_MU, std_dev=const.INTENSITY_STD
-):
+, is_mars=False):
     """
     Format a single frame of track cloud data.
 
@@ -489,8 +495,13 @@ def format_single_frame(
         The formatted single frame data reshaped into an 8x8 matrix, with columns for x, y, z, r', intensity.
 
     """
+    fb_fr_batch = const.FB_FRAMES_BATCH
+    if is_mars:
+        fb_fr_batch = 0
 
-    sorted_data = np.zeros((const.FB_FRAMES_BATCH + 1, 64, 5))
+    sorted_data = np.zeros((fb_fr_batch + 1, 64, 5))
+    if is_mars:
+        sorted_data = np.zeros((1,64,5))
 
     for frame_id, frame_cloud in enumerate(track_cloud):
 
@@ -514,10 +525,10 @@ def format_single_frame(
         sorted_data[frame_id] = padded_data[sorted_indices]
 
     # Resize to matrix (Added a condition two check different models)
-    if const.FB_FRAMES_BATCH == 0:
-        return sorted_data.reshape((64, 5)).reshape((8, 8, 5))
-    else:
-        return sorted_data.reshape((const.FB_FRAMES_BATCH + 1, 8, 8, 5))
+    # if const.FB_FRAMES_BATCH == 0 or is_mars:
+    #     return sorted_data.reshape((64, 5)).reshape((8, 8, 5))
+    # else:
+    return sorted_data.reshape((fb_fr_batch + 1, 8, 8, 5))
 
 
 def format_batched_frames(frame_clouds):

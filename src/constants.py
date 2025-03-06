@@ -7,7 +7,7 @@ PIXEL_TO_METERS = 0.000265
 
 ##### General Flags #####
 PROFILING = False
-SCREEN_CONNECTED = True
+SCREEN_CONNECTED = False
 
 ##### Paths and Ports #####
 P_CONFIG_PATH = "./config_cases/our_config_8.5m.cfg"
@@ -23,8 +23,8 @@ P_MMWAVE_DIR = "/mmWave/"
 
 P_PROFILING_PATH = "./profiling/"
 
-P_CLI_PORT = "/dev/ttyACM0"
-P_DATA_PORT = "/dev/ttyACM1"
+P_CLI_PORT = "COM8"
+P_DATA_PORT = "COM9"
 
 ###### Scene Setup ######
 # Sensitive Object Coordinates
@@ -38,8 +38,8 @@ SCREEN_SIZE = [1.6, 1.1]  # Smart Window Size
 SCREEN_HEIGHT = 1.3  # Smart Window Installation Height
 
 # Sensor Attributes
-S_HEIGHT = 1.8  # Sensor Installation Height
-S_TILT = -5  # Sensor Tilt: (-180, 180)
+S_HEIGHT = 1.37 # Sensor Installation Height
+S_TILT = 0  # Sensor Tilt: (-180, 180)
 
 # Plot Parameters
 V_SCALLING = 1  # Scaling parameter (only for emulating)
