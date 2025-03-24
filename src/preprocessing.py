@@ -18,12 +18,15 @@ from Tracking import (
 )
 from wakepy import keep
 
+# TODO: Make this constant as the environment setup 
 # Dataset capturing environment setup offsets
-KINECT_Z = 0.8
-KINECT_X = 0.22
-RELATIVE_ENABLED = True
+KINECT_Z = 0.9
+KINECT_X = 0.2
+RELATIVE_ENABLED = False
 
-
+# Pairs the kinect and mmwave frames together
+# I/p: Experiment name (A1, A2...)
+# O/p: [(mmwave_frame_no, kinect_frame_no),...]
 def pair(experiment):
     kinect_input = os.path.join(
         f"{const.P_LOG_PATH}{const.P_KINECT_DIR}", f"{experiment}.csv"
@@ -41,10 +44,10 @@ def pair(experiment):
 
             for _, row1 in unique_frames.iterrows():
                 timestamp1 = row1[6]
-                closest_row = df2.iloc[(df2[0] - timestamp1).abs().argsort()[:1]]
+                closest_row = df2.iloc[(df2[0] - timestamp1).abs().argsort()[:1]] #Find the closest row in kinect wrt to mmwave timestamp
                 timestamp2 = closest_row.iloc[0, 0]
 
-                if abs(timestamp1 - timestamp2) < 20:
+                if abs(timestamp1 - timestamp2) < 20: #If timestamp difference between 20ms, then include the pair ids 
                     pairs.append((int(row1[0]), closest_row.iloc[0, 1]))
     return pairs
 
@@ -84,21 +87,21 @@ def filter_kinect_frames(pairs, invalid_frames, experiment):
                 valid_counter += 1
 
 
-def translate_kinect(row):
+def translate_kinect(row, kinect_x, kinect_z):
     # TODO: Is this angle rad for the tilt of the mmwave radar?
     ang_rad = np.radians(6.5)
     z, y = 0, 0
     for i in range(2, len(row) - 1):
         # For all x coords
         if i % 3 == 2:
-            row[i] = str(float(row[i]) + KINECT_X)
+            row[i] = str(float(row[i]) + kinect_x)
             z = float(row[i + 1])
             y = float(row[i + 2])
 
         # For all z coords:
         elif i % 3 == 0:
             row[i] = str(
-                y * np.sin(ang_rad) + float(row[i]) * np.cos(ang_rad) + KINECT_Z
+                y * np.sin(ang_rad) + float(row[i]) * np.cos(ang_rad) + kinect_z
             )
 
         # For all y coords:
@@ -130,11 +133,13 @@ def static_kinect(row):
     return row
 
 
-def preprocess_dataset():
+def preprocess_dataset(runall = True, exp = ""):
 
     experiments_directory = f"{const.P_LOG_PATH}{const.P_MMWAVE_DIR}"
     print("Preprocessing:")
-    for experiment in tqdm(os.listdir(experiments_directory)):
+    for experiment in tqdm(os.listdir(experiments_directory)): #Lists experiments A1, A2...
+        if not runall and experiment != exp:
+            continue
 
         frame_pairs = pair(experiment)
 
@@ -169,7 +174,7 @@ def preprocess_dataset():
                         trackbuffer.dt = detObj["posix"][0] / 1000 - trackbuffer.t
 
                     trackbuffer.t = detObj["posix"][0] / 1000
-                    effective_data = normalize_data(detObj)
+                    effective_data = normalize_data(detObj) #Effective_data: (n x 8) ndarray, n -> number of point clouds for a frame
 
                     if effective_data.shape[0] != 0:
                         trackbuffer.track(effective_data, batch)
@@ -461,22 +466,28 @@ def split_sets(prefixes):
 
 # 10 randomly split sets [validation, testing]
 sets = [
-    [["A6", "A4", "B2"], ["B1", "B4", "A5"]],
-    [["B1", "B3", "A3"], ["B2", "B8", "B7"]],
-    [["B4", "A2", "B7"], ["B2", "B5", "A3"]],
-    [["A6", "A4", "B9"], ["B2", "B6", "A5"]],
-    [["B5", "B2", "A7"], ["B4", "A2", "A3"]],
-    [["B6", "B9", "B5"], ["A7", "A6", "B3"]],
-    [["A6", "B8", "A3"], ["B3", "B4", "A4"]],
-    [["B1", "A7", "B8"], ["A5", "A3", "B6"]],
-    [["B2", "B5", "B8"], ["A7", "B6", "A6"]],
-    [["A4", "B6", "A7"], ["B2", "B5", "B1"]],
+    # [["A1", "A2", "A1"], ["A1", "A2", "A1"]],
+    # [["B1", "B1", "B1"], ["B1", "B1", "B1"]],
+    # [["B2", "B2", "B2"], ["B2", "B2", "B2"]],
+    # [["C1", "C1", "C1"], ["C1", "C1", "C1"]],
+    # [["A1", "A1", "A1"], ["A1", "A1", "A1"]],
+    [["A2", "A2", "A2"], ["A2", "A2", "A2"]],
+    # [["T1", "T1", "T1"], ["T1", "T1", "T1"]],
+    # [["D1", "D1", "D1"], ["D1", "D1", "D1"]],
+    # [["G1", "G1", "G1"], ["G1", "G1", "G1"]]
+    
+    # [["B5", "B2", "A7"], ["B4", "A2", "A3"]],
+    # [["B6", "B9", "B5"], ["A7", "A6", "B3"]],
+    # [["A6", "B8", "A3"], ["B3", "B4", "A4"]],
+    # [["B1", "A7", "B8"], ["A5", "A3", "B6"]],
+    # [["B2", "B5", "B8"], ["A7", "B6", "A6"]],
+    # [["A4", "B6", "A7"], ["B2", "B5", "B1"]],
 ]
 
-print("Preprocessing:")
-preprocess_dataset()
+# print("Preprocessing:")
+# preprocess_dataset()
 
-print("Formatting:")
-for i in tqdm(range(10)):
-    split_sets(sets[i])
-    format_dataset(i)
+# print("Formatting:")
+# for i in tqdm(range(len(sets))):
+#     split_sets(sets[i])
+#     format_dataset(i)

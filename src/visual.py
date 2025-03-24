@@ -11,8 +11,8 @@ import constants as const
 from mpl_toolkits.mplot3d import Axes3D
 
 # ---------- Set Experiment Here-----------
-EXPERIMENT = "A2"
-JSON_PATH = f"{const.P_DATA_PATH}/analysis/{EXPERIMENT}.json"
+EXPERIMENT = "AEABAA"
+JSON_PATH = f"{const.P_DATA_PATH}/sim/{EXPERIMENT}.json"
 
 ERROR_PLOT_RANGE = 10
 # -----------------------------------------
@@ -21,6 +21,7 @@ class MatplotlibGridWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        # Upper - 2,3, 18, 4, 7
          # Define connections and keypoints
         self.connections = [
             (0, 1),  # SpineBase to SpineMid
@@ -146,7 +147,7 @@ class MatplotlibGridWidget(QWidget):
                     float(track[1][keypoint_index]),
                     c=color,
                     marker=marker,
-                    s=100 if keypoint_index == 3 else 50,  # Larger size for the head
+                    s=15 if keypoint_index == 3 else 15,  # Larger size for the head
                 )
 
     def plot_error_graph(self, errors, index, ax, key):
@@ -164,7 +165,7 @@ class MatplotlibGridWidget(QWidget):
         ax.plot(x_values, mean_y_error, label = "Mean Y Error")
         ax.plot(x_values, mean_z_error, label = "Mean Z Error")
         ax.axvline(x=index, color='r', linestyle='--')
-        
+        ax.set_ylim(0, 1.0)
         # ax.plot()
         ax.legend()
 
@@ -189,8 +190,10 @@ class MatplotlibGridWidget(QWidget):
         self.update_skeleton(mars, self.ax_mars)
         self.update_skeleton(ast, self.ax_ast, True)
 
-        self.plot_error_graph(errors, index, self.ax_ast_error, 'ast')
-        self.plot_error_graph(errors, index, self.ax_mars_error, 'mars')
+
+        if errors is not None:
+            self.plot_error_graph(errors, index, self.ax_ast_error, 'ast')
+            self.plot_error_graph(errors, index, self.ax_mars_error, 'mars')
 
 
 
@@ -252,7 +255,7 @@ class MainWindow(QMainWindow):
         else:
             errors = self.main_data['error'][index-5:index+5]
         
-        
+        errors = None
         self.matplotlib_widget.update_plot(gt=self.main_data['gt'][index],ast= self.main_data['ast'][index], mars=self.main_data['mars'][index], errors=errors, index=index)
 
     
