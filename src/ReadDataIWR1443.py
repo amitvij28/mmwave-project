@@ -270,7 +270,7 @@ class ReadIWR14xx(object):
         config = [line.rstrip("\r\n") for line in open(self.configFileName)]
         for i in config:
             self.CLIport.write((i + "\n").encode())
-            print(i)
+            # print(i)
             time.sleep(0.01)
 
     def __del__(self):

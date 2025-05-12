@@ -559,6 +559,20 @@ def format_batched_frames(frame_clouds):
     return full_batch
 
 
+def format_mars_frames(frame_cloud):
+    full_batch = np.zeros((64, 5))
+    effective_frame_cloud = frame_cloud[:, [0, 1, 2, -2, -1]]
+    frame_cloud_len = len(effective_frame_cloud)
+    if frame_cloud_len < 64:
+        num_to_pad = 64 - frame_cloud_len
+        zero_arr = np.zeros((num_to_pad, 5))
+        padded_data = np.concatenate((effective_frame_cloud, zero_arr), axis = 0)
+    else:
+        padded_data = effective_frame_cloud[:64]
+    full_batch = padded_data
+    return full_batch
+
+
 def format_single_frame_mode(
     track_cloud: np.array, mean, std_dev, batch_size, fuse=False
 ):

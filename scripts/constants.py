@@ -12,7 +12,7 @@ SCREEN_CONNECTED = False
 ##### Paths and Ports #####
 P_CONFIG_PATH = "./config_cases/our_config_8.5m.cfg"
 P_MODEL_PATH = "./model/tmars_amit.h5"
-P_DATA_PATH = "./dataset_main"
+P_DATA_PATH = "./dataset_asterios"
 
 P_LOG_PATH = f"{P_DATA_PATH}/log"
 P_PREPROCESS_PATH = f"{P_DATA_PATH}/preprocessed"
@@ -23,8 +23,8 @@ P_MMWAVE_DIR = "/mmWave/"
 
 P_PROFILING_PATH = "./profiling/"
 
-P_CLI_PORT = "COM5"
-P_DATA_PORT = "COM6"
+P_CLI_PORT = "COM8"
+P_DATA_PORT = "COM9"
 
 ###### Scene Setup ######
 # Sensitive Object Coordinates
