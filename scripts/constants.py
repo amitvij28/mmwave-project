@@ -12,7 +12,7 @@ SCREEN_CONNECTED = False
 ##### Paths and Ports #####
 P_CONFIG_PATH = "./config_cases/our_config_8.5m.cfg"
 P_MODEL_PATH = "./model/tmars_amit.h5"
-P_DATA_PATH = "./dataset_asterios"
+P_DATA_PATH = "./dataset_main"
 
 P_LOG_PATH = f"{P_DATA_PATH}/log"
 P_PREPROCESS_PATH = f"{P_DATA_PATH}/preprocessed"
@@ -44,7 +44,7 @@ S_TILT = 0  # Sensor Tilt: (-180, 180)
 # Plot Parameters
 V_SCALLING = 1  # Scaling parameter (only for emulating)
 
-V_3D_AXIS = [[-2.5, 2.5], [0, 5], [0, 3]]
+V_3D_AXIS = [[-4, 4], [0, 5], [0, 5]]
 V_SCREEN_FADE_SIZE_MAX: float = 0.3
 V_SCREEN_FADE_SIZE_MIN: float = 0.2
 V_SCREEN_FADE_WEIGHT: float = (

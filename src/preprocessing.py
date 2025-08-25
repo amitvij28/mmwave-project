@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import pandas as pd
 import shutil
@@ -80,7 +81,7 @@ def filter_kinect_frames(pairs, invalid_frames, experiment):
     output_file = os.path.join(
         f"{const.P_PREPROCESS_PATH}{const.P_KINECT_DIR}", f"{experiment}.csv"
     )
-
+    centroid_dict = {}
     invalid_kinect_frames = []
     for inv_frame in invalid_frames:
         for pair in pairs:
@@ -95,8 +96,7 @@ def filter_kinect_frames(pairs, invalid_frames, experiment):
 
         valid_counter = 0
         for rows in reader:
-            
-            # TODO: Check if this is working fine
+
             if len(rows) > 60:
                 row = [item for i, item in enumerate(rows) if i not in [20,21,22, 32,33,34]]
             else:
@@ -108,12 +108,16 @@ def filter_kinect_frames(pairs, invalid_frames, experiment):
 
                 translated_row = translate_kinect(row)
 
+                skeleton_spinebase = [ float(translated_row[2]), float(translated_row[4]), float(translated_row[3]) ]
+                centroid_dict[row[1]] = skeleton_spinebase
+
                 if RELATIVE_ENABLED:
                     translated_row = static_kinect(translated_row)
 
+
                 writer.writerow(translated_row)
                 valid_counter += 1
-
+    return centroid_dict
 
 def translate_kinect(row, kinect_x = None, kinect_z = None):
     # TODO: Is this angle rad for the tilt of the mmwave radar?
@@ -165,14 +169,21 @@ def preprocess_dataset(runall = True, exp = ""):
 
     experiments_directory = f"{const.P_LOG_PATH}{const.P_MMWAVE_DIR}"
     print("Preprocessing:")
+
+    mars_dir = f"{const.P_PREPROCESS_PATH}/mars/"   
+    kinect_dir = f"{const.P_PREPROCESS_PATH}{const.P_KINECT_DIR}"
+    if os.path.exists(mars_dir):
+        shutil.rmtree(mars_dir)
+    if os.path.exists(kinect_dir):
+        shutil.rmtree(kinect_dir)
+    os.makedirs(mars_dir)
+    os.makedirs(kinect_dir)
+
     for experiment in tqdm(os.listdir(experiments_directory)): #Lists experiments A1, A2...
         if not runall and experiment != exp:
             continue
 
-        if experiment == "T1":
-            continue
         print(f"Preprocessing {experiment}")
-
         frame_pairs = pair(experiment)
 
         input_dir = os.path.join(f"{const.P_LOG_PATH}{const.P_MMWAVE_DIR}", experiment)
@@ -194,6 +205,11 @@ def preprocess_dataset(runall = True, exp = ""):
         invalid_frames = []
 
         mars_data_buffer = pd.DataFrame()
+
+        # 
+        centroid_dict = filter_kinect_frames(frame_pairs, invalid_frames, experiment)
+        # print(centroid_dict)
+
         while not sensor_data.is_finished():
             valid_frame = False
             dataOk, framenum, detObj = sensor_data.get_data()
@@ -223,10 +239,24 @@ def preprocess_dataset(runall = True, exp = ""):
                             ):
                                 valid_frame = True
 
+                                chosen_track_idx = 0
+                                if len(trackbuffer.effective_tracks) > 1:
+                                    gt_frame = [p[1] for p in frame_pairs if framenum == p[0]][0]
+                                    gt_centroid = centroid_dict[str(gt_frame)]
+                                    min_centroid_dist = math.inf
+                                    for track_idx in range(len(trackbuffer.effective_tracks)):
+                                        dist = np.linalg.norm(trackbuffer.effective_tracks[track_idx].cluster.centroid[:3] - np.array(gt_centroid))
+                                        if dist < min_centroid_dist:
+                                            chosen_track_idx = track_idx
+                                # if chosen_track_idx =??= 0:
+                                if chosen_track_idx == 0 and len(trackbuffer.effective_tracks) > 1:
+                                    print(chosen_track_idx)
+
+
                                 frames_to_process = list(
-                                    trackbuffer.effective_tracks[0].batch.buffer
+                                    trackbuffer.effective_tracks[chosen_track_idx].batch.buffer
                                 )
-                                # print(f"[preprocessing] frames shape {effective_data.shape}")
+
 
                                 if RELATIVE_ENABLED:
                                     frames_to_process = relative_coordinates(
@@ -531,24 +561,9 @@ def split_sets(prefixes):
 #     [["A4", "B6", "A7"], ["B2", "B5", "B1"]],
 # ]
 
-sets = [[['ACAAAA', 'CDAAAO', 'CABCAO'], ['CAAAAO', 'DBCBAO', 'AEBCAA']],
- [['CDCAAO', 'BAACAO', 'BBBCAO'], ['ACBBAA', 'DCBBAO', 'CCCAAO']],
- [['BDCAAO', 'CDCAAO', 'BACAAO'], ['ADCCAA', 'AEABAA', 'AEBCAA']],
- [['ADBBAA', 'BAABAO', 'ABACAA'], ['ABCCAA', 'AABAAA', 'DBCBAO']],
- [['BCBAAO', 'CECAAO', 'AECAAA'], ['BCCAAO', 'DBBBAO', 'BCBAAO']],
- [['CBBCAO', 'CEBAAO', 'AABAAA'], ['BDCCAO', 'BBCAAO', 'BDBBAO']],
- [['BCCAAO', 'AEABAA', 'BCBBAO'], ['CABBAO', 'AEBAAA', 'CDBAAO']],
- [['BEABAO', 'ACABAA', 'AACBAA'], ['CDCBAO', 'CDCBAO', 'ABABAA']],
- [['BCBBAO', 'AAACAA', 'CDBAAO'], ['ADCBAA', 'CAACAO', 'AEBBAA']],
- [['ADCBAA', 'ABAAAA', 'CEACAO'], ['BBABAO', 'ABCCAA', 'BACAAO']]]
-
 # print("Preprocessing:")
-# preprocess_dataset()
+preprocess_dataset()
 
-# print("Formatting:")
-# for i in tqdm(range(len(sets))):
-#     split_sets(sets[i])
-#     format_dataset(i)
 
 def format_experiment(experiment):
     mean=const.INTENSITY_MU 
@@ -674,4 +689,13 @@ def format_experiment(experiment):
         np.array(mars_data)
     )
 
-format_experiment("T2")
+
+def run_experiment_formatting():
+    experiments = os.listdir(os.path.join(const.P_PREPROCESS_PATH, "mmWave"))
+    for exp in experiments:
+
+        print(f"Running formatting for {exp}")
+        format_experiment(exp)
+
+
+run_experiment_formatting()

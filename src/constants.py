@@ -44,7 +44,7 @@ S_TILT = 0  # Sensor Tilt: (-180, 180)
 # Plot Parameters
 V_SCALLING = 1  # Scaling parameter (only for emulating)
 
-V_3D_AXIS = [[-2.5, 2.5], [0, 5], [0, 3]]
+V_3D_AXIS = [[-4, 4], [0, 5], [0, 3]]
 V_SCREEN_FADE_SIZE_MAX: float = 0.3
 V_SCREEN_FADE_SIZE_MIN: float = 0.2
 V_SCREEN_FADE_WEIGHT: float = (

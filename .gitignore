@@ -4,3 +4,9 @@
 **/model
 **/gif
 **/demos
+env/
+dataset_old/
+plots/
+dataset**
+simulation/
+.vscode/

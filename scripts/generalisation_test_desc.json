@@ -1,0 +1,89 @@
+{
+    "E1": {
+        "name": "E1",
+        "description": "Penguin Lab, Cluttered Room",
+        "train_codes": [
+            "A",
+            "C"
+        ],
+        "train_idx": 1
+    },
+    "E2": {
+        "name": "E2",
+        "description": "Cluttered Lab, Common Room",
+        "train_codes": [
+            "B",
+            "C"
+        ],
+        "train_idx": 1
+    },
+    "E3": {
+        "name": "E3",
+        "description": "Penguin Lab, Common Room",
+        "train_codes": [
+            "A",
+            "B"
+        ],
+        "train_idx": 1
+    },
+    "A1": {
+        "name": "A1",
+        "description": "Learn seperate arms, test combined arms",
+        "train_codes": [
+            "A",
+            "B",
+            "D",
+            "E"
+        ],
+        "train_idx": 2
+    },
+    "A2": {
+        "name": "A2",
+        "description": "Learn right, combined, test left arms",
+        "train_codes": [
+            "A",
+            "C",
+            "D",
+            "F"
+        ],
+        "train_idx": 2
+    },
+    "A3": {
+        "name": "A3",
+        "description": "Learn straight, test waving motion",
+        "train_codes": [
+            "A",
+            "B",
+            "C"
+        ],
+        "train_idx": 2
+    },
+    "D1": {
+        "name": "D1",
+        "description": "Train on 2m, test on 3m",
+        "train_codes": [
+            "A"
+        ],
+        "train_idx": 3
+    },
+    "U1": {
+        "name": "U1",
+        "description": "Test on tallest user",
+        "train_codes": [
+            "B",
+            "C",
+            "D"
+        ],
+        "train_idx": 0
+    },
+    "U2": {
+        "name": "U2",
+        "description": "Test on smallest user",
+        "train_codes": [
+            "A",
+            "B",
+            "D"
+        ],
+        "train_idx": 0
+    }
+}
