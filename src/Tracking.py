@@ -729,6 +729,6 @@ class TrackBuffer:
 
         frame_matrices_array = np.array(frame_matrices)
         if len(frame_matrices_array) > 0:
-            frame_keypoints = model.predict(frame_matrices_array)
+            frame_keypoints = model.predict(frame_matrices_array, verbose=0)
             for i, index in enumerate(indexes):
                 self.effective_tracks[index].keypoints = frame_keypoints[i]

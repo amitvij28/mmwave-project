@@ -23,8 +23,8 @@ P_MMWAVE_DIR = "/mmWave/"
 
 P_PROFILING_PATH = "./profiling/"
 
-P_CLI_PORT = "COM5"
-P_DATA_PORT = "COM6"
+P_CLI_PORT = "COM8"
+P_DATA_PORT = "COM9"
 
 ###### Scene Setup ######
 # Sensitive Object Coordinates
@@ -44,7 +44,7 @@ S_TILT = 0  # Sensor Tilt: (-180, 180)
 # Plot Parameters
 V_SCALLING = 1  # Scaling parameter (only for emulating)
 
-V_3D_AXIS = [[-4, 4], [0, 5], [0, 3]]
+V_3D_AXIS = [[-4, 4], [0, 5], [0, 5]]
 V_SCREEN_FADE_SIZE_MAX: float = 0.3
 V_SCREEN_FADE_SIZE_MIN: float = 0.2
 V_SCREEN_FADE_WEIGHT: float = (

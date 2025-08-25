@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 """ This module is taken from https://github.com/FmmW-Group/IWR1443-Python-API/blob/main/README.md"""
 
+dotnet_epoch = datetime(1, 1, 1, tzinfo=timezone.utc)
 
 class ReadIWR14xx(object):
     def __init__(self, configFileName, CLIport, Dataport):
@@ -109,7 +110,8 @@ class ReadIWR14xx(object):
                 if tlv_type == self.MMWDEMO_UART_MSG_DETECTED_POINTS:
 
                     ############ Capture NTP timestamp here ################
-                    ntp_stamp = round(datetime.now(timezone.utc).timestamp() * 1000)
+                    ntp_stamp = round(((datetime.now(timezone.utc) - dotnet_epoch).total_seconds() * 10**7)/10_000)
+                    # ntp_stamp = round(datetime.now(timezone.utc).timestamp() * 1000)
 
                     # word array to convert 4 bytes to a 16 bit number
                     word = [1, 2**8]
@@ -268,7 +270,7 @@ class ReadIWR14xx(object):
         config = [line.rstrip("\r\n") for line in open(self.configFileName)]
         for i in config:
             self.CLIport.write((i + "\n").encode())
-            print(i)
+            # print(i)
             time.sleep(0.01)
 
     def __del__(self):
